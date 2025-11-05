@@ -30,32 +30,35 @@ export default function Page() {
     address: gof,
     abi: ABI,
     functionName: "balanceOf",
-    args: [address],
-    watch: true,
+    args: [address ?? "0x0000000000000000000000000000000000000000"],
+    query: { refetchInterval: 4000 }
   });
 
   const { data: collateralBalance } = useReadContract({
     address: tusdc,
     abi: ABI,
     functionName: "balanceOf",
-    args: [address],
-    watch: true,
+    args: [address ?? "0x0000000000000000000000000000000000000000"],
+    query: { refetchInterval: 4000 }
   });
 
   const { data: requiredCollateral } = useReadContract({
     address: gof,
     abi: ABI,
     functionName: "requiredCollateralForMint",
-    args: [mintAmount ? parseUnits(mintAmount, 18) : 0n],
-    watch: true,
+    args: [mintAmount ? parseUnits(mintAmount, 18) : BigInt(0)],
+    query: { refetchInterval: 4000 }
   });
 
   const { data: allowance } = useReadContract({
     address: tusdc,
     abi: ABI,
     functionName: "allowance",
-    args: [address, gof],
-    watch: true,
+    args: [
+      address ?? "0x0000000000000000000000000000000000000000",
+      gof,
+    ],
+    query: { refetchInterval: 4000 }
   });
 
   const isApproved =
@@ -67,21 +70,21 @@ export default function Page() {
     address: gof,
     abi: ABI,
     functionName: "getGoldPrice",
-    watch: true,
+    query: { refetchInterval: 4000 }
   });
 
   const { data: collateralRatioPct } = useReadContract({
     address: gof,
     abi: ABI,
     functionName: "collateralRatioPct",
-    watch: true,
+    query: { refetchInterval: 4000 }
   });
 
   const { data: redeemFeeBps } = useReadContract({
     address: gof,
     abi: ABI,
     functionName: "redeemFeeBps",
-    watch: true,
+    query: { refetchInterval: 4000 }
   });
 
   let redeemEstimate = 0;
@@ -111,7 +114,7 @@ export default function Page() {
         address: tusdc,
         abi: ABI,
         functionName: "approve",
-        args: [gof, requiredCollateral ?? 0n],
+        args: [gof, requiredCollateral ?? BigInt(0)],
       });
       toast.success("Collatéral approuvé");
     } catch {
@@ -222,15 +225,12 @@ export default function Page() {
               />
 
               <p className="text-xs text-slate-500">
-                Collatéral requis :{" "}
-                {(Number(requiredCollateral ?? 0n) / 1e6).toFixed(4)} tUSDC
+                Collatéral requis : {(Number(requiredCollateral ?? BigInt(0)) / 1e6).toFixed(4)} tUSDC
               </p>
 
               <Button
                 onClick={handleApprove}
-                disabled={
-                  !isConnected || loadingApprove || Number(mintAmount) <= 0
-                }
+                disabled={!isConnected || loadingApprove || Number(mintAmount) <= 0}
                 className="bg-neutral-950 text-white hover:bg-neutral-700 h-12"
               >
                 {loadingApprove ? "Approbation..." : "Approve Collatéral"}
@@ -249,9 +249,7 @@ export default function Page() {
           {/* Redeem */}
           <Card className="shadow-lg">
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-xl text-slate-900">
-                Redeem Tokens
-              </CardTitle>
+              <CardTitle className="text-xl text-slate-900">Redeem Tokens</CardTitle>
             </CardHeader>
 
             <CardContent className="flex flex-col gap-4">
@@ -269,15 +267,14 @@ export default function Page() {
 
               <Button
                 onClick={handleRedeem}
-                disabled={
-                  !isConnected || loadingRedeem || Number(redeemAmount) <= 0
-                }
+                disabled={!isConnected || loadingRedeem || Number(redeemAmount) <= 0}
                 className="bg-neutral-950 hover:bg-neutral-700 text-white h-12"
               >
                 {loadingRedeem ? "Redeem en cours..." : "Redeem GOF → tUSDC"}
               </Button>
             </CardContent>
           </Card>
+
         </div>
       </div>
     </div>
