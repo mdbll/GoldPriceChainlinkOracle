@@ -24,7 +24,7 @@ export default function Page() {
   const { writeContract } = useWriteContract();
 
   const gof = process.env.NEXT_PUBLIC_GOF_ADDRESS as `0x${string}`;
-  const tusdc = process.env.NEXT_PUBLIC_COLLATERAL_ADDRESS as `0x${string}`;
+  const usdc = process.env.NEXT_PUBLIC_COLLATERAL_ADDRESS as `0x${string}`;
 
   const { data: gofBalance } = useReadContract({
     address: gof,
@@ -35,7 +35,7 @@ export default function Page() {
   });
 
   const { data: collateralBalance } = useReadContract({
-    address: tusdc,
+    address: usdc,
     abi: ABI,
     functionName: "balanceOf",
     args: [address ?? "0x0000000000000000000000000000000000000000"],
@@ -51,7 +51,7 @@ export default function Page() {
   });
 
   const { data: allowance } = useReadContract({
-    address: tusdc,
+    address: usdc,
     abi: ABI,
     functionName: "allowance",
     args: [
@@ -111,7 +111,7 @@ export default function Page() {
     try {
       setLoadingApprove(true);
       await writeContract({
-        address: tusdc,
+        address: usdc,
         abi: ABI,
         functionName: "approve",
         args: [gof, requiredCollateral ?? BigInt(0)],
@@ -196,7 +196,7 @@ export default function Page() {
                   <Wallet className="w-6 h-6 text-indigo-600" />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <p className="text-sm text-slate-500">Solde tUSDC</p>
+                  <p className="text-sm text-slate-500">Solde USDC</p>
                   <p className="text-3xl font-bold text-slate-900">
                     {collateralBalance
                       ? (Number(collateralBalance) / 1e6).toFixed(2)
@@ -225,7 +225,7 @@ export default function Page() {
               />
 
               <p className="text-xs text-slate-500">
-                Collatéral requis : {(Number(requiredCollateral ?? BigInt(0)) / 1e6).toFixed(4)} tUSDC
+                Collatéral requis : {(Number(requiredCollateral ?? BigInt(0)) / 1e6).toFixed(4)} USDC
               </p>
 
               <Button
@@ -262,7 +262,7 @@ export default function Page() {
               />
 
               <p className="text-xs text-slate-500">
-                ≈ Vous recevrez : {redeemEstimate.toFixed(4)} tUSDC
+                ≈ Vous recevrez : {redeemEstimate.toFixed(4)} USDC
               </p>
 
               <Button
@@ -270,7 +270,7 @@ export default function Page() {
                 disabled={!isConnected || loadingRedeem || Number(redeemAmount) <= 0}
                 className="bg-neutral-950 hover:bg-neutral-700 text-white h-12"
               >
-                {loadingRedeem ? "Redeem en cours..." : "Redeem GOF → tUSDC"}
+                {loadingRedeem ? "Redeem en cours..." : "Redeem GOF → USDC"}
               </Button>
             </CardContent>
           </Card>
