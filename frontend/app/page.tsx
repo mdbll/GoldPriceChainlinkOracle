@@ -183,7 +183,7 @@ export default function Page() {
                   <p className="text-sm text-slate-500">Solde GOF</p>
                   <p className="text-3xl font-bold text-slate-900">
                     {gofBalance
-                      ? (Number(gofBalance) / 1e18).toFixed(2)
+                      ? (Number(gofBalance) / 1e18).toFixed(6)
                       : "0.00"}
                   </p>
                 </div>
