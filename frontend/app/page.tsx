@@ -35,10 +35,26 @@ export default function Page() {
   const [loadingNftApprove, setLoadingNftApprove] = useState(false);
   const [loadingNftMint, setLoadingNftMint] = useState(false);
 
+  const [shopImage, setShopImage] = useState("");
+
   const publicClient = createPublicClient({
     chain: sepolia,
     transport: http(),
   });
+
+  useEffect(() => {
+    const loadShopImage = async () => {
+      try {
+        const metadataUrl = `https://ipfs.io/ipfs/${meta}`;
+        const json = await fetch(metadataUrl).then((r) => r.json());
+        const img = json.image.replace("ipfs://", "https://ipfs.io/ipfs/");
+        setShopImage(img);
+      } catch (err) {
+        console.log("Erreur chargement boutique image:", err);
+      }
+    };
+    loadShopImage();
+  }, [meta]);
 
   const { data: gofBalance } = useReadContract({
     address: gof,
@@ -457,24 +473,25 @@ export default function Page() {
               </CardHeader>
 
               <CardContent className="flex flex-col sm:flex-row gap-6">
-                <img
-                  src={`https://ipfs.io/ipfs/${meta}`}
-                  className="w-full sm:w-1/2 rounded-lg object-cover border border-neutral-200"
-                />
-
+                {shopImage && (
+                  <img
+                    src={shopImage}
+                    className="w-full sm:w-1/2 rounded-lg object-cover border border-neutral-200"
+                  />
+                )}
                 <div className="flex flex-col justify-between flex-1">
                   <div>
                     <h3 className="text-lg font-semibold text-neutral-800">
                       Goldorak #1
                     </h3>
                     <p className="text-sm text-neutral-500">
-                      Rareté : Épique ⭐
+                      Rareté : <span className="text-violet-600">Épique</span> ⭐
                     </p>
                   </div>
 
                   {ownsNft ? (
                     <p className="text-green-600 font-medium text-center mt-4">
-                      ✅ Déjà possédé
+                      Déjà possédé
                     </p>
                   ) : needsNftApproval ? (
                     <Button
