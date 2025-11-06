@@ -51,30 +51,74 @@ contract GoldStableChainlink is ERC20, Ownable, ReentrancyGuard {
 
     /// @notice Get gold price from Chainlink, normalized to 18 decimals
     function getGoldPrice() public view returns (uint256 price18, uint256 updatedAt) {
-        // TODO: Retrieve data from priceFeed.latestRoundData()
-        // TODO: Normalize price to 18 decimals
-        // HINT: use priceFeed.decimals() to adjust
+        (, int256 answer, , uint256 updated, ) = priceFeed.latestRoundData();
+        uint8 decimalsFeed = priceFeed.decimals();
+
+        require(answer > 0, "Oracle price invalid");
+
+        // Normalisation en 18 décimales
+        price18 = uint256(answer) * (10 ** (18 - decimalsFeed));
+        updatedAt = updated;
     }
+
+
 
     /// @notice Calculate how much collateral is needed to mint `amountGOF`
     function requiredCollateralForMint(uint256 amountGOF) public view returns (uint256 requiredCollateral) {
-        // TODO: Use gold price and collateral ratio to compute required collateral
-        // HINT: convert between decimals (18 for price, token decimals for collateral)
+        (uint256 goldPrice18, ) = getGoldPrice(); // prix en 18 décimales
+        uint256 collateralRatio = uint256(collateralRatioPct) * 1e16; // convertit 120% → 1.20 * 1e18
+
+        // Valeur de amountGOF * prix, puis appliquer ratio
+        uint256 collateralValue18 = (amountGOF * goldPrice18) / 1e18;
+        uint256 collateralWithRatio = (collateralValue18 * collateralRatio) / 1e18;
+
+        // Convertir en décimales du token collatéral (USDC = 6 décimales)
+        uint8 decimalsCollateral = ERC20(address(collateral)).decimals();
+        requiredCollateral = collateralWithRatio / (10 ** (18 - decimalsCollateral));
     }
+
+
 
     function mintWithCollateral(uint256 amountGOF) external nonReentrant {
-        // TODO: calculate required collateral
-        // TODO: transfer collateral from sender
-        // TODO: apply mint fee and mint tokens
-        // TODO: emit Minted event
+        uint256 required = requiredCollateralForMint(amountGOF);
+
+        // Prendre le collateral de l'utilisateur
+        require(collateral.transferFrom(msg.sender, address(this), required), "transfer failed");
+
+        // Appliquer la fee de mint (ex : 0.5%)
+        uint256 fee = (amountGOF * mintFeeBps) / BPS_DENOM;
+        uint256 amountAfterFee = amountGOF - fee;
+
+        // Mint du GOF
+        _mint(msg.sender, amountAfterFee);
+
+        emit Minted(msg.sender, amountAfterFee, required);
     }
 
+
+
     function redeem(uint256 amountGOF) external nonReentrant {
-        // TODO: compute gold value of amountGOF
-        // TODO: apply redemption fee
-        // TODO: burn GOF and transfer collateral back
-        // TODO: emit Redeemed event
+        (uint256 goldPrice18, ) = getGoldPrice();
+        uint256 collateralRatio = uint256(collateralRatioPct) * 1e16;
+
+        // Valeur or → collatéral
+        uint256 value18 = (amountGOF * goldPrice18) / 1e18;
+        uint256 collateralValue18 = (value18 * collateralRatio) / 1e18;
+
+        uint8 decimalsCollateral = ERC20(address(collateral)).decimals();
+        uint256 collateralAmount = collateralValue18 / (10 ** (18 - decimalsCollateral));
+
+        // Fee
+        uint256 fee = (collateralAmount * redeemFeeBps) / BPS_DENOM;
+        uint256 collateralAfterFee = collateralAmount - fee;
+
+        _burn(msg.sender, amountGOF);
+        require(collateral.transfer(msg.sender, collateralAfterFee), "transfer failed");
+
+        emit Redeemed(msg.sender, amountGOF, collateralAfterFee);
     }
+
+
 
     // ADMIN FUNCTIONS
     function setPriceFeed(address newFeed) external onlyOwner {

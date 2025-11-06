@@ -1,0 +1,8 @@
+{
+  "name": "Goldorak #1",
+  "description": "Premier NFT Goldorak de la collection.",
+  "image": "ipfs://bafybeiaofxvqr6wv3opr5ymhhqsutuwajfzyyh6xirwzvxk7p3jrvn2b5e",
+  "attributes": [
+    { "trait_type": "Rareté", "value": "Épique" }
+  ]
+}

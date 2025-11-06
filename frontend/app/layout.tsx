@@ -1,14 +1,14 @@
 "use client";
 
-import '@rainbow-me/rainbowkit/styles.css';
+import "@rainbow-me/rainbowkit/styles.css";
 
 import { Geist, Geist_Mono } from "next/font/google";
-import { WagmiProvider } from 'wagmi'
-import { config } from "../components/config"
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WagmiProvider } from "wagmi";
+import { config } from "../components/config";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./globals.css";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -35,8 +35,8 @@ export default function RootLayout({
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider>
-            {children}
-            <Toaster />
+              {children}
+              <Toaster />
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
